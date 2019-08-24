@@ -1,6 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+
+SEED=1
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+torch.backends.cudnn.deterministic=True
 
 class SimpleNet(nn.Module):
 
@@ -49,20 +56,36 @@ net.zero_grad()
 #loss function
 target = torch.randn(10)
 target = target.view(1, -1)
-criterion = nn.MSELoss()
+mseloss = nn.MSELoss()
 
-loss = criterion(out, target)
-print(loss)
-print(loss.grad_fn)
-print(loss.grad_fn.next_functions)
+#loss = mseloss(out, target)
+#print(loss)
+#print(loss.grad_fn)
+#print(loss.grad_fn.next_functions)
+#
+#loss.backward()
+#
+#print(net.conv1.bias.grad)
 
+## update weight simple
+#learning_rate = 0.01
+#for f in net.parameters():
+#    f.data.sub_(f.grad.data * learning_rate)
+#
+
+## update
+import torch.optim as optim
+optimizer = optim.SGD(net.parameters(), lr = 0.01)
+output = net(input)
+print(target)
+print(output)
+loss = mseloss(output, target)
 loss.backward()
+print(loss.grad_fn)
+optimizer.step()
 
-print(net.conv1.bias.grad)
 
-learning_rate = 0.01
-for f in net.parameters():
-    f.data.sub_(f.grad.data * learning_rate)
+
 
 
 
